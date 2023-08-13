@@ -14,17 +14,17 @@ func main() {
 	bot_token := os.Getenv("DC_TOKEN") // Take bot token as an env var
 
 	// Create the bot instance
-	discord, err := discordgo.New("Bot " + bot_token)
+	chadpole, err := discordgo.New("Bot " + bot_token)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Open up the bot instance, defer close for when bot is interrupted
-	discord.Open()
-	defer discord.Close()
+	chadpole.Open()
+	defer chadpole.Close()
 
-	RegisterAllCommands(discord)
-	SetupAllHandlers(discord)
+	RegisterAllCommands(chadpole)
+	SetupAllHandlers(chadpole)
 
 	// Run until terminated in the console
 	fmt.Println("Chadpole is ribbiting...")

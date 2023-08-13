@@ -12,7 +12,7 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if strings.Contains(strings.ToLower(m.Content), "frog") {
+	if strings.Contains(strings.ToLower(m.Content), "frog") || strings.Contains(strings.ToLower(m.Content), "ribbit") {
 		s.MessageReactionAdd(m.ChannelID, m.ID, "🐸") // Add frog emoji reaction
 		log.Println("[INFO] Frog reacting to message " + m.ID)
 	}

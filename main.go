@@ -41,6 +41,9 @@ var (
 		"ribbit-button": commands.RibbitButtonHandler,
 		"odesli":        commands.OdesliHandler,
 	}
+	componentHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+		"primary_test": commands.PrimaryTestBtnHandler,
+	}
 )
 
 func main() {
@@ -66,11 +69,28 @@ func main() {
 		}
 		registeredCommands[i] = cmd
 	}
+	/*
+		// Attach command handlers
+		discord.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+				h(s, i)
+			}
+		})
+	*/
 
-	// Attach handlers to commands
+	// Attach all handlers
 	discord.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-			h(s, i)
+		switch i.Type {
+		// Attach command handlers for slash commands
+		case discordgo.InteractionApplicationCommand:
+			if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+				h(s, i)
+			}
+		// Attach component handlers, such as handlers for buttons
+		case discordgo.InteractionMessageComponent:
+			if h, ok := componentHandlers[i.MessageComponentData().CustomID]; ok {
+				h(s, i)
+			}
 		}
 	})
 

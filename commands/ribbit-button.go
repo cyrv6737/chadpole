@@ -22,6 +22,11 @@ func RibbitButtonHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 							Style: discordgo.LinkButton,
 							URL:   "https://www.google.com",
 						},
+						discordgo.Button{
+							Label:    "Primary",
+							Style:    discordgo.PrimaryButton,
+							CustomID: "primary_test",
+						},
 					},
 				},
 			},
@@ -29,4 +34,15 @@ func RibbitButtonHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	})
 
 	log.Println("[INFO] Sending ribbit with buttons")
+}
+
+func PrimaryTestBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "Ribbit, you pressed the primary button",
+		},
+	})
+
+	log.Println("[INFO] User pressed the Primary Test button")
 }

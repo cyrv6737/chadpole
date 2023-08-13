@@ -69,6 +69,9 @@ func main() {
 		}
 	})
 
+	// Allow the created message handler to monitor messages
+	discord.AddHandler(MessageCreateHandler)
+
 	// Run until terminated in the console
 	fmt.Println("Chadpole is ribbiting...")
 	c := make(chan os.Signal, 1)

@@ -25,10 +25,16 @@ var (
 			Name:        "ribbit-embed",
 			Description: "Ribbit, but embeded",
 		},
+		{
+			Name:        "odesli",
+			Description: "Convert any music link into a song.link",
+			Options:     commands.OdesliOptions,
+		},
 	}
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"ribbit":       commands.RibbitHandler,
 		"ribbit-embed": commands.RibbitEmbedHandler,
+		"odesli":       commands.OdesliHandler,
 	}
 )
 

@@ -1,6 +1,6 @@
 # chadpole
 
-Discord bot using the discordgo library that I am using to experiment with golang. This bot is not meant to be used in a serious capacity. Features are implemented because I think they are cool and/or useful to build to learn from.
+Discord bot using the discordgo library that I am using to experiment with golang. This bot is not meant to be used in a serious capacity. Features are implemented because I think they are cool and/or useful to learn from.
 
 ## Documentation Used
 - https://0x2142.com/how-to-discordgo-bot/

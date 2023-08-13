@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -21,15 +20,17 @@ func main() {
 
 	// Open up the bot instance, defer close for when bot is interrupted
 	chadpole.Open()
+	log.Println("[START] Chadpole is ribbiting...")
 	defer chadpole.Close()
 
 	RegisterAllCommands(chadpole)
 	SetupAllHandlers(chadpole)
 
 	// Run until terminated in the console
-	fmt.Println("Chadpole is ribbiting...")
+	log.Println("[INFO] Ready")
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
+	log.Println("[SHUTDOWN] Unribbiting gracefully...")
 
 }

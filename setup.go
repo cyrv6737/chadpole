@@ -52,6 +52,7 @@ func RegisterAllCommands(s *discordgo.Session) {
 		}
 		registeredCommands[i] = cmd
 	}
+	log.Println("[IFNO] All commands registered to Chadpole")
 }
 
 // Attach all of the handlers required for functionality
@@ -75,4 +76,6 @@ func SetupAllHandlers(s *discordgo.Session) {
 
 	// Allow the created message handler to monitor messages
 	s.AddHandler(MessageCreateHandler)
+
+	log.Println("[INFO] All handlers attached to Chadpole")
 }

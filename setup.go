@@ -27,20 +27,25 @@ var (
 		},
 		{
 			Name:        "ribbit-btn-edit",
-			Description: "Paginated Ribbits",
+			Description: "Editable Ribbits",
 		},
 		{
 			Name:        "odesli",
 			Description: "Convert any music link into a song.link",
 			Options:     commands.OdesliOptions,
 		},
+		{
+			Name:        "ribbit-pagination",
+			Description: "Example pagination",
+		},
 	}
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"ribbit":          commands.RibbitHandler,
-		"ribbit-embed":    commands.RibbitEmbedHandler,
-		"ribbit-button":   commands.RibbitButtonHandler,
-		"ribbit-btn-edit": commands.RibbitBtnEditHandler,
-		"odesli":          commands.OdesliHandler,
+		"ribbit":            commands.RibbitHandler,
+		"ribbit-embed":      commands.RibbitEmbedHandler,
+		"ribbit-button":     commands.RibbitButtonHandler,
+		"ribbit-btn-edit":   commands.RibbitBtnEditHandler,
+		"odesli":            commands.OdesliHandler,
+		"ribbit-pagination": commands.RibbitPaginationHandler,
 	}
 	componentHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"primary_test": commands.PrimaryTestBtnHandler,

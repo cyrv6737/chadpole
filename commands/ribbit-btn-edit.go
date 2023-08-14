@@ -1,5 +1,5 @@
 /*
-Example of button functions editing it's own message
+Example of button functions editing it's own message. Was originally supposed to be a pagination example
 */
 package commands
 

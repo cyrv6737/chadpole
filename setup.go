@@ -26,7 +26,7 @@ var (
 			Description: "Ribbit with buttons",
 		},
 		{
-			Name:        "ribbit-pages",
+			Name:        "ribbit-btn-edit",
 			Description: "Paginated Ribbits",
 		},
 		{
@@ -36,11 +36,11 @@ var (
 		},
 	}
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"ribbit":        commands.RibbitHandler,
-		"ribbit-embed":  commands.RibbitEmbedHandler,
-		"ribbit-button": commands.RibbitButtonHandler,
-		"ribbit-pages":  commands.RibbitPagesHandler,
-		"odesli":        commands.OdesliHandler,
+		"ribbit":          commands.RibbitHandler,
+		"ribbit-embed":    commands.RibbitEmbedHandler,
+		"ribbit-button":   commands.RibbitButtonHandler,
+		"ribbit-btn-edit": commands.RibbitBtnEditHandler,
+		"odesli":          commands.OdesliHandler,
 	}
 	componentHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"primary_test": commands.PrimaryTestBtnHandler,

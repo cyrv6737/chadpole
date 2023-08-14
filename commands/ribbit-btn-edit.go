@@ -12,7 +12,7 @@ import (
 
 var page_number = 0
 
-func RibbitPagesHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func RibbitBtnEditHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{

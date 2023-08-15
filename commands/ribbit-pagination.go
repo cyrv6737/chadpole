@@ -306,13 +306,36 @@ func (p *PaginationView) PG_AddHandlers(s *discordgo.Session, i *discordgo.Inter
 Entrypoint for the pagination system
 */
 func RibbitPaginationHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+	jsonChannel := make(chan []byte)
+
+	go FetchAPIData(jsonChannel)
+
+	jsonResult := <-jsonChannel
+
+	new_pagination := PaginationView{
+		index:           0,
+		pageBtnHandlers: make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)), // Must create the map for the handler CustomIDs
+		exampleData:     []FrogExample{},                                                             // Declare slice of JSON receiver struct
+	}
+
+	err := json.Unmarshal(jsonResult, &new_pagination.exampleData)
+	if err != nil {
+		log.Println("[ERROR] Could not decode json")
+	}
+
+	log.Println("[INFO] New pagination created")
+	new_pagination.SendMessage(s, i) // Send the message, functions as the entrypoint for the pagination view
+}
+
+func FetchAPIData(ch chan []byte) {
 	/*
 		Fetches frog data from the API hosted locally by the bot
 	*/
 	response, err := http.Get("http://127.0.0.1:8081/frog")
 	if err != nil {
 		log.Println("[ERROR] Could not get API response")
-		return
+		ch <- nil
 	}
 	defer response.Body.Close()
 
@@ -321,17 +344,6 @@ func RibbitPaginationHandler(s *discordgo.Session, i *discordgo.InteractionCreat
 		log.Println("[ERROR] could not read JSON body")
 	}
 
-	new_pagination := PaginationView{
-		index:           0,
-		pageBtnHandlers: make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)), // Must create the map for the handler CustomIDs
-		exampleData:     []FrogExample{},                                                             // Declare slice of JSON receiver struct
-	}
-
-	err = json.Unmarshal(jsonBody, &new_pagination.exampleData)
-	if err != nil {
-		log.Println("[ERROR] Could not decode json")
-	}
-
-	log.Println("[INFO] New pagination created")
-	new_pagination.SendMessage(s, i) // Send the message, functions as the entrypoint for the pagination view
+	log.Println("[INFO] Successfully retrieved API response")
+	ch <- jsonBody
 }

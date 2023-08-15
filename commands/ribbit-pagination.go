@@ -3,9 +3,7 @@ Exmaple pagination implementation with buttons.
 Inspired from https://github.com/Necroforger/dgwidgets/blob/master/paginator.go
 As well as from my own personal work at: https://github.com/CooldudePUGS/Spectre/blob/90463d95839caf6a8551cf6fa91ac2dc952101b5/cogs/ModSearch.py
 
-A lot of variables here start with "TS" which stands for thunderstore, as this was originally
-supposed to be an implementation of thunderstore mod searching. Might save that for another module
-and get extra confusing lol.
+Fetches a JSON response from the locally hosted frog information API, displays that information in a paginated embed.
 
 KNOWN ISSUES:
   - Logging information will repeat several times depending on how many times pagination has been called.
@@ -20,8 +18,11 @@ package commands
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"sync"
 
 	"github.com/bwmarrin/discordgo"
@@ -38,6 +39,8 @@ type PaginationView struct {
 	index           int
 	embedtitle      string
 	embeddesc       string
+	embedLink       string
+	embedImgURL     string
 	handerPrefix    string
 	pageBtnHandlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 	exampleData     []FrogExample // Create a slice of the struct where our data will be stored.
@@ -45,8 +48,10 @@ type PaginationView struct {
 }
 
 type FrogExample struct {
-	frogName string
-	frogDesc string
+	FrogName  string `json:"name"`
+	FrogDesc  string `json:"desc"`
+	FrogLink  string `json:"link"`
+	FrogImage string `json:"imageURL"`
 }
 
 /*
@@ -94,8 +99,10 @@ Creates the embed. This function is called every time there is an update to the 
 */
 func (p *PaginationView) CreateEmbed() []*discordgo.MessageEmbed {
 	// Pull data from Data slice based on the index which is modified with the buttons
-	p.embedtitle = fmt.Sprintf("%s", p.exampleData[p.index].frogName)
-	p.embeddesc = fmt.Sprintf("%s", p.exampleData[p.index].frogDesc)
+	p.embedtitle = p.exampleData[p.index].FrogName
+	p.embeddesc = p.exampleData[p.index].FrogDesc
+	p.embedLink = p.exampleData[p.index].FrogLink
+	p.embedImgURL = p.exampleData[p.index].FrogImage
 
 	embed := []*discordgo.MessageEmbed{
 		{
@@ -103,6 +110,9 @@ func (p *PaginationView) CreateEmbed() []*discordgo.MessageEmbed {
 			Description: p.embeddesc,
 			Footer: &discordgo.MessageEmbedFooter{
 				Text: fmt.Sprintf("Page: %d/%d", p.currentPage, len(p.exampleData)),
+			},
+			Thumbnail: &discordgo.MessageEmbedThumbnail{
+				URL: p.embedImgURL,
 			},
 		},
 	}
@@ -145,6 +155,11 @@ func (p *PaginationView) CreateBtns() []discordgo.MessageComponent {
 					Label:    "Done",
 					Style:    discordgo.SuccessButton,
 					CustomID: p.handerPrefix + "pg_done",
+				},
+				discordgo.Button{
+					Label: "View",
+					Style: discordgo.LinkButton,
+					URL:   p.embedLink,
 				},
 				discordgo.Button{
 					Label:    "Stop",
@@ -291,18 +306,34 @@ func (p *PaginationView) PG_AddHandlers(s *discordgo.Session, i *discordgo.Inter
 Entrypoint for the pagination system
 */
 func RibbitPaginationHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	/*
+		Fetches frog data from the API hosted locally by the bot
+	*/
+	response, err := http.Get("http://127.0.0.1:8081/frog")
+	if err != nil {
+		log.Println("[ERROR] Could not get API response")
+		return
+	}
+	defer response.Body.Close()
+
+	jsonBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Println("[ERROR] could not read JSON body")
+	}
+
 	new_pagination := PaginationView{
 		index:           0,
 		pageBtnHandlers: make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)), // Must create the map for the handler CustomIDs
-		exampleData: []FrogExample{ // Declare our data here outside of the struct
-			{"Red-eyed Tree Frog", "Known for its vibrant green coloration, the red-eyed tree frog is native to the rainforests of Central and South America. It has striking red eyes and orange feet, and it spends most of its life in trees near water bodies."},
-			{"Poison Dart Frog", "Poison dart frogs are small and brightly colored frogs found in Central and South America. They are known for their toxic skin secretions, which have been used by indigenous people to poison the tips of blowgun darts for hunting."},
-			{"African Clawed Frog", "Native to sub-Saharan Africa, the African clawed frog is an aquatic species that lacks tongue and teeth. Its distinctive \"claws\" on its hind feet are used for digging and defense."},
-			{"Goliath Frog", "The Goliath frog is the largest frog species, found in Cameroon and Equatorial Guinea in Africa. It can grow to be over a foot long and has a unique appearance with robust body proportions."},
-			{"Wood Frog", "Wood frogs are found in North America and are known for their remarkable adaptation to cold environments. They can survive freezing temperatures by entering a state of suspended animation and then thawing back to life when temperatures rise."},
-		},
+		exampleData:     []FrogExample{},                                                             // Declare slice of JSON receiver struct
 	}
+
+	err = json.Unmarshal(jsonBody, &new_pagination.exampleData)
+	if err != nil {
+		log.Println("[ERROR] Could not decode json")
+	}
+
 	log.Println("[INFO] New pagination created")
 	new_pagination.SendMessage(s, i) // Send the message, functions as the entrypoint for the pagination view
+	log.Println(new_pagination.exampleData)
 
 }

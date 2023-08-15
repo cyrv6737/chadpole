@@ -30,6 +30,8 @@ func main() {
 	SetupAllHandlers(chadpole)
 	SetupStatus(chadpole)
 
+	// Start frog API on its own goroutine
+	go StartFrogAPI()
 	// Run until terminated in the console
 	log.Println("[INFO] Ready")
 	c := make(chan os.Signal, 1)

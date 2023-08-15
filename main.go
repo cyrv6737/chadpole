@@ -28,6 +28,7 @@ func main() {
 
 	RegisterAllCommands(chadpole)
 	SetupAllHandlers(chadpole)
+	SetupStatus(chadpole)
 
 	// Run until terminated in the console
 	log.Println("[INFO] Ready")

@@ -91,3 +91,15 @@ func SetupAllHandlers(s *discordgo.Session) {
 
 	log.Println("[INFO] All handlers attached to Chadpole")
 }
+
+func SetupStatus(s *discordgo.Session) {
+	s.UpdateStatusComplex(discordgo.UpdateStatusData{
+		AFK: false,
+		Activities: []*discordgo.Activity{
+			{
+				Name: "Frogging 🐸",
+				Type: discordgo.ActivityTypeCompeting,
+			},
+		},
+	})
+}

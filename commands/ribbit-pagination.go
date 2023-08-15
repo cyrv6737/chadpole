@@ -57,14 +57,14 @@ func (p *PaginationView) Setup(s *discordgo.Session, i *discordgo.InteractionCre
 	p.handerPrefix = p.GenPrefix() // Generate prefix to uniquely identify paginator controls
 	p.Unlock()
 	// Assign handlers to their respective CustomIDs
-	p.pageBtnHandlers[p.handerPrefix+"pg_next"] = p.TSNextBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"pg_prev"] = p.TSPrevBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"pg_stop"] = p.TSStopBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"pg_done"] = p.TSDoneBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"pg_first"] = p.TSFirstBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"pg_last"] = p.TSLastBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_next"] = p.PG_NextBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_prev"] = p.PG_PrevBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_stop"] = p.PG_StopBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_done"] = p.PG_DoneBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_first"] = p.PG_FirstBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_last"] = p.PG_LastBtnHandler
 	// Add the handlers to the bot
-	p.TSAddHandlers(s, i)
+	p.PG_AddHandlers(s, i)
 	p.currentPage = p.index + 1
 }
 
@@ -202,7 +202,7 @@ func (p *PaginationView) UpdateMessage(s *discordgo.Session, i *discordgo.Intera
 Increments the index value. In a proper situation you would use this index value to get more data from
 a data structure
 */
-func (p *PaginationView) TSNextBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) PG_NextBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Lock()
 	defer p.Unlock()
 	p.index = (p.index + 1) % len(p.exampleData) // Circular pagination
@@ -210,7 +210,7 @@ func (p *PaginationView) TSNextBtnHandler(s *discordgo.Session, i *discordgo.Int
 	p.UpdateMessage(s, i)
 }
 
-func (p *PaginationView) TSPrevBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) PG_PrevBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Lock()
 	defer p.Unlock()
 	if p.index == 0 { // Prevent running out of bounds. Function as a "last" button if index is at 0
@@ -223,13 +223,13 @@ func (p *PaginationView) TSPrevBtnHandler(s *discordgo.Session, i *discordgo.Int
 	}
 }
 
-func (p *PaginationView) TSFirstBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) PG_FirstBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	log.Printf("[INFO] Pagination %s data set to first", p.handerPrefix)
 	p.index = 0
 	p.UpdateMessage(s, i)
 }
 
-func (p *PaginationView) TSLastBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) PG_LastBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	log.Printf("[INFO] Pagination %s data set to last index", p.handerPrefix)
 	p.index = len(p.exampleData) - 1
 	p.UpdateMessage(s, i)
@@ -238,7 +238,7 @@ func (p *PaginationView) TSLastBtnHandler(s *discordgo.Session, i *discordgo.Int
 /*
 Deletes the message if pressed, also resets running status
 */
-func (p *PaginationView) TSStopBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) PG_StopBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	/*
 		Holy fucking shit
 		this is how you delete your own fucking message
@@ -258,7 +258,7 @@ func (p *PaginationView) TSStopBtnHandler(s *discordgo.Session, i *discordgo.Int
 Resets running status but instead of deleting the message, it just gets rid of the buttons so the
 embed is permanent in the channel
 */
-func (p *PaginationView) TSDoneBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) PG_DoneBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
 		Data: &discordgo.InteractionResponseData{
@@ -273,7 +273,7 @@ Add all the handlers for the buttons. Notably this is a direct copy-paste implem
 Definitely not the best solution. Should probably change this later.
 I am fairly confident (lol) that cleaner code here would not help the issue with concurrent paginations.
 */
-func (p *PaginationView) TSAddHandlers(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) PG_AddHandlers(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		switch i.Type {
 		// Attach component handlers, such as handlers for buttons

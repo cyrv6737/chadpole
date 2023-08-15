@@ -12,7 +12,7 @@ func main() {
 
 	bot_token := os.Getenv("DC_TOKEN") // Take bot token as an env var
 	if bot_token == "" {
-		log.Fatal("[FATAL] No Discord Token provided as environment variable")
+		log.Fatal("[FATAL] No Discord Token provided in env as DC_TOKEN")
 	}
 
 	// Create the bot instance

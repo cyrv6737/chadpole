@@ -58,6 +58,8 @@ func (p *PaginationView) Setup(s *discordgo.Session, i *discordgo.InteractionCre
 	p.pageBtnHandlers[p.handerPrefix+"ts_prev"] = p.TSPrevBtnHandler
 	p.pageBtnHandlers[p.handerPrefix+"ts_stop"] = p.TSStopBtnHandler
 	p.pageBtnHandlers[p.handerPrefix+"ts_done"] = p.TSDoneBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"ts_first"] = p.TSFirstBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"ts_last"] = p.TSLastBtnHandler
 	// Add the handlers to the bot
 	p.TSAddHandlers(s, i)
 }
@@ -108,18 +110,32 @@ func (p *PaginationView) CreateBtns() []discordgo.MessageComponent {
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
 				discordgo.Button{
-					Label:    "Prev",
-					Style:    discordgo.SuccessButton,
+					Label:    "<<",
+					Style:    discordgo.PrimaryButton,
+					CustomID: p.handerPrefix + "ts_first",
+				},
+				discordgo.Button{
+					Label:    "<",
+					Style:    discordgo.PrimaryButton,
 					CustomID: p.handerPrefix + "ts_prev",
 				},
 				discordgo.Button{
-					Label:    "Next",
-					Style:    discordgo.SuccessButton,
+					Label:    ">",
+					Style:    discordgo.PrimaryButton,
 					CustomID: p.handerPrefix + "ts_next",
 				},
 				discordgo.Button{
-					Label:    "Done",
+					Label:    ">>",
 					Style:    discordgo.PrimaryButton,
+					CustomID: p.handerPrefix + "ts_last",
+				},
+			},
+		},
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.Button{
+					Label:    "Done",
+					Style:    discordgo.SuccessButton,
 					CustomID: p.handerPrefix + "ts_done",
 				},
 				discordgo.Button{
@@ -189,6 +205,16 @@ func (p *PaginationView) TSPrevBtnHandler(s *discordgo.Session, i *discordgo.Int
 	defer p.Unlock()
 	p.index--
 	log.Printf("[INFO] Pagination %s data decremented", p.handerPrefix)
+	p.UpdateMessage(s, i)
+}
+
+func (p *PaginationView) TSFirstBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	log.Printf("[INFO] Pagination %s data set to first", p.handerPrefix)
+	p.UpdateMessage(s, i)
+}
+
+func (p *PaginationView) TSLastBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	log.Printf("[INFO] Pagination %s data set to last index", p.handerPrefix)
 	p.UpdateMessage(s, i)
 }
 

@@ -145,6 +145,9 @@ func (p *PaginationView) SendMessage(s *discordgo.Session, i *discordgo.Interact
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
+			// You can make searches only visible to the invoker with the following:
+			// (Note: The stop button won't work)
+			// Flags:      discordgo.MessageFlagsEphemeral,
 			Embeds:     p.CreateEmbed(),
 			Components: p.CreateBtns(),
 		},
@@ -159,6 +162,9 @@ func (p *PaginationView) UpdateMessage(s *discordgo.Session, i *discordgo.Intera
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
 		Data: &discordgo.InteractionResponseData{
+			// You can make searches only visible to the invoker with the following:
+			// (Note: The stop button won't work)
+			// Flags:      discordgo.MessageFlagsEphemeral
 			Embeds:     p.CreateEmbed(),
 			Components: p.CreateBtns(),
 		},

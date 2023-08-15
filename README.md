@@ -24,7 +24,7 @@ This bot uses slash commands exclusively.
 | odesli.go | Takes any link and uses the Odesli API to return a song.link |
 | ribbit.go | Frog themed ping-pong impl. |
 | ribbit-embed.go | Ping-pong impl. with an embed |
-| ribbit-button.go | Ping-ping impl. with some buttons |
+| ribbit-button.go | Ping-pong impl. with some buttons |
 | ribbit-btn-edit.go | Message with buttons that when pressed edit the message or do something |
 | ribbit-pagination.go | Example impl. of a paginated embed using discord buttons. To my knowledge this is the only public example of pagination in discordgo with buttons. This one also handles multiple pagination sessions (in a slightly ham-fisted manner)
 

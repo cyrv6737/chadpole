@@ -334,6 +334,4 @@ func RibbitPaginationHandler(s *discordgo.Session, i *discordgo.InteractionCreat
 
 	log.Println("[INFO] New pagination created")
 	new_pagination.SendMessage(s, i) // Send the message, functions as the entrypoint for the pagination view
-	log.Println(new_pagination.exampleData)
-
 }

@@ -43,7 +43,7 @@ func FrogAPIHandler(w http.ResponseWriter, r *http.Request) {
 			Name:  "Wood Frog",
 			Desc:  "Wood frogs are found in North America and are known for their remarkable adaptation to cold environments. They can survive freezing temperatures by entering a state of suspended animation and then thawing back to life when temperatures rise.",
 			Link:  "https://en.wikipedia.org/wiki/Wood_frog",
-			Image: "https://en.wikipedia.org/wiki/File:Wood_Frog.jpg",
+			Image: "https://images.saymedia-content.com/.image/t_share/MTc0NjQ2MTIzODkyNTgxNzU0/frozen-wood-frogs-and-adaptations-for-survival.jpg",
 		},
 	}
 

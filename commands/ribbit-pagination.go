@@ -15,6 +15,9 @@ KNOWN ISSUES:
     This will ensure that different handlers are assigned to the pagination every time.
     The drawback of this is that there are now essentially "dead handlers" attached to the bot. Maybe
     the garbage collector deals with it at some point. The fuck do I know. At least it works now
+
+TODO:
+  - Add circular pagination and max pages
 */
 package commands
 

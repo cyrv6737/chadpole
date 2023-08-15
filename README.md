@@ -16,6 +16,7 @@ $ DC_TOKEN=<discord bot token> ./chadpole
 | main.go | Creates the connection between the bot and Discord. Invokes setup. |
 | setup.go | Adds all commands and handlers at run time. |
 | msg.go | Simple message listener/handler. Not intended to be used to listen for legacy prefix commands. |
+| frog_api.go | Simple API that serves a JSON response of 5 frogs |
 
 ### Commands package
 This bot uses slash commands exclusively.
@@ -26,7 +27,7 @@ This bot uses slash commands exclusively.
 | ribbit-embed.go | Ping-pong impl. with an embed |
 | ribbit-button.go | Ping-pong impl. with some buttons |
 | ribbit-btn-edit.go | Message with buttons that when pressed edit the message or do something |
-| ribbit-pagination.go | Example impl. of a paginated embed using discord buttons. To my knowledge this is the only public example of pagination in discordgo with buttons. This one also handles multiple pagination sessions (in a slightly ham-fisted manner)
+| ribbit-pagination.go | Example impl. of a paginated embed using discord buttons. To my knowledge this is the only public example of pagination in discordgo with buttons. This one also handles multiple pagination sessions (in a slightly ham-fisted manner). Pulls data from frog API.
 
 ## Documentation Used
 - https://0x2142.com/how-to-discordgo-bot/

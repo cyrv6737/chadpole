@@ -3,13 +3,6 @@ Exmaple pagination implementation with buttons.
 Inspired from https://github.com/Necroforger/dgwidgets/blob/master/paginator.go
 As well as from my own personal work at: https://github.com/CooldudePUGS/Spectre/blob/90463d95839caf6a8551cf6fa91ac2dc952101b5/cogs/ModSearch.py
 
-One notable difference between this implementation and the python one in spectre is that
-I cannot properly get multiple indepdendent paginations up at once.
-The values are properly isolated due to making a new struct each time as well as using mutex locks
-I believe the issue lies in that the button handlers get added to the global bot
-To my knowledge there isn't a way to add these handlers to a specific message instance. This might
-be due to the fact that there is no "view" implementation like disordpy has.
-
 A lot of variables here start with "TS" which stands for thunderstore, as this was originally
 supposed to be an implementation of thunderstore mod searching. Might save that for another module
 and get extra confusing lol.

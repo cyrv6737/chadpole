@@ -306,11 +306,10 @@ func (p *PaginationView) PG_AddHandlers(s *discordgo.Session, i *discordgo.Inter
 Entrypoint for the pagination system
 */
 func RibbitPaginationHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-
+	// Put API fetch on its own goroutine, incase server takes a while to respond
+	// Not an issue with the local API but could be elsewhere
 	jsonChannel := make(chan []byte)
-
 	go FetchAPIData(jsonChannel)
-
 	jsonResult := <-jsonChannel
 
 	new_pagination := PaginationView{

@@ -42,17 +42,27 @@ type PaginationView struct {
 	pageBtnHandlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
 }
 
+/*
+General setup housekeeping should go here
+*/
 func (p *PaginationView) Setup(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Lock()
-	p.handerPrefix = p.GenPrefix()
+	p.handerPrefix = p.GenPrefix() // Generate prefix to uniquely identify paginator controls
 	p.Unlock()
+	// Assign handlers to their respective CustomIDs
 	p.pageBtnHandlers[p.handerPrefix+"ts_next"] = p.TSNextBtnHandler
 	p.pageBtnHandlers[p.handerPrefix+"ts_prev"] = p.TSPrevBtnHandler
 	p.pageBtnHandlers[p.handerPrefix+"ts_stop"] = p.TSStopBtnHandler
 	p.pageBtnHandlers[p.handerPrefix+"ts_done"] = p.TSDoneBtnHandler
+	// Add the handlers to the bot
 	p.TSAddHandlers(s, i)
 }
 
+/*
+Generate a unique random prefix to identify a unique paginator's button CustomIDs
+Unfortunately this is how I decided to work around being unable to cleanly add
+buttons to a specific instance rather than globally
+*/
 func (p *PaginationView) GenPrefix() string {
 	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	length := 8

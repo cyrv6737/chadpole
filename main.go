@@ -11,6 +11,9 @@ import (
 func main() {
 
 	bot_token := os.Getenv("DC_TOKEN") // Take bot token as an env var
+	if bot_token == "" {
+		log.Fatal("[FATAL] No Discord Token provided as environment variable")
+	}
 
 	// Create the bot instance
 	chadpole, err := discordgo.New("Bot " + bot_token)

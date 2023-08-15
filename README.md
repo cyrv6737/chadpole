@@ -25,7 +25,7 @@ $ DC_TOKEN=<discord bot token> ./chadpole
 | ribbit-embed.go | Ping-pong impl. with an embed |
 | ribbit-button.go | Ping-ping impl. with some buttons |
 | ribbit-btn-edit.go | Message with buttons that when pressed edit the message or do something |
-| ribbit-pagination.go | Example impl. of a paginated embed using discord buttons. To my knowledge this is the only public example of pagination in discordgo with buttons.
+| ribbit-pagination.go | Example impl. of a paginated embed using discord buttons. To my knowledge this is the only public example of pagination in discordgo with buttons. This one also handles multiple pagination sessions (in a slightly ham-fisted manner)
 
 ## Documentation Used
 - https://0x2142.com/how-to-discordgo-bot/

@@ -57,12 +57,12 @@ func (p *PaginationView) Setup(s *discordgo.Session, i *discordgo.InteractionCre
 	p.handerPrefix = p.GenPrefix() // Generate prefix to uniquely identify paginator controls
 	p.Unlock()
 	// Assign handlers to their respective CustomIDs
-	p.pageBtnHandlers[p.handerPrefix+"ts_next"] = p.TSNextBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"ts_prev"] = p.TSPrevBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"ts_stop"] = p.TSStopBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"ts_done"] = p.TSDoneBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"ts_first"] = p.TSFirstBtnHandler
-	p.pageBtnHandlers[p.handerPrefix+"ts_last"] = p.TSLastBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_next"] = p.TSNextBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_prev"] = p.TSPrevBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_stop"] = p.TSStopBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_done"] = p.TSDoneBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_first"] = p.TSFirstBtnHandler
+	p.pageBtnHandlers[p.handerPrefix+"pg_last"] = p.TSLastBtnHandler
 	// Add the handlers to the bot
 	p.TSAddHandlers(s, i)
 	p.currentPage = p.index + 1
@@ -120,22 +120,22 @@ func (p *PaginationView) CreateBtns() []discordgo.MessageComponent {
 				discordgo.Button{
 					Label:    "<<",
 					Style:    discordgo.PrimaryButton,
-					CustomID: p.handerPrefix + "ts_first",
+					CustomID: p.handerPrefix + "pg_first",
 				},
 				discordgo.Button{
 					Label:    "<",
 					Style:    discordgo.PrimaryButton,
-					CustomID: p.handerPrefix + "ts_prev",
+					CustomID: p.handerPrefix + "pg_prev",
 				},
 				discordgo.Button{
 					Label:    ">",
 					Style:    discordgo.PrimaryButton,
-					CustomID: p.handerPrefix + "ts_next",
+					CustomID: p.handerPrefix + "pg_next",
 				},
 				discordgo.Button{
 					Label:    ">>",
 					Style:    discordgo.PrimaryButton,
-					CustomID: p.handerPrefix + "ts_last",
+					CustomID: p.handerPrefix + "pg_last",
 				},
 			},
 		},
@@ -144,12 +144,12 @@ func (p *PaginationView) CreateBtns() []discordgo.MessageComponent {
 				discordgo.Button{
 					Label:    "Done",
 					Style:    discordgo.SuccessButton,
-					CustomID: p.handerPrefix + "ts_done",
+					CustomID: p.handerPrefix + "pg_done",
 				},
 				discordgo.Button{
 					Label:    "Stop",
 					Style:    discordgo.DangerButton,
-					CustomID: p.handerPrefix + "ts_stop",
+					CustomID: p.handerPrefix + "pg_stop",
 				},
 			},
 		},

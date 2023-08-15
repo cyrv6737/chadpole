@@ -79,7 +79,7 @@ func (p *PaginationView) GenPrefix() string {
 	prefix := make([]byte, length)
 	_, err := rand.Read(prefix)
 	if err != nil {
-		log.Println("[ERROR] Could not generate random prefix")
+		log.Println("[WARN] Could not generate random prefix. Things might get weird.")
 		return ""
 	}
 	for i, b := range prefix {

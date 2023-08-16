@@ -253,7 +253,7 @@ func (p *PaginationView) PG_LastBtnHandler(s *discordgo.Session, i *discordgo.In
 }
 
 /*
-Deletes the message if pressed, also resets running status
+Deletes the message if pressed
 Note: this handler only works if the message is *not* ephemeral. Current impl. is
 the message *is* ephemeral, so this handler has no shown corresponding button atm.
 */
@@ -274,8 +274,11 @@ func (p *PaginationView) PG_StopBtnHandler(s *discordgo.Session, i *discordgo.In
 }
 
 /*
-Resets running status but instead of deleting the message, it just gets rid of the buttons so the
-embed is permanent in the channel
+Gets rid of the buttons so theembed is permanent in the channel
+
+# OR
+
+Send a new message without the ephemeral flag and retain some buttons but not all (current impl.)
 */
 func (p *PaginationView) PG_DoneBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

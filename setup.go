@@ -2,6 +2,7 @@ package main
 
 import (
 	"chadpole/commands"
+	"chadpole/util"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
@@ -87,7 +88,7 @@ func SetupAllHandlers(s *discordgo.Session) {
 	})
 
 	// Allow the created message handler to monitor messages
-	s.AddHandler(MessageCreateHandler)
+	s.AddHandler(util.MessageCreateHandler)
 
 	log.Println("[INFO] All handlers attached to Chadpole")
 }

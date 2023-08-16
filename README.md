@@ -15,6 +15,10 @@ $ DC_TOKEN=<discord bot token> ./chadpole
 |------|---------|
 | main.go | Creates the connection between the bot and Discord. Invokes setup. |
 | setup.go | Adds all commands and handlers at run time. |
+
+### Util package
+| File | Purpose |
+|------|---------|
 | msg.go | Simple message listener/handler. Not intended to be used to listen for legacy prefix commands. |
 | frog_api.go | Simple API that serves a JSON response of 5 frogs |
 

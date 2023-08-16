@@ -152,7 +152,7 @@ func (p *PaginationView) CreateBtns() []discordgo.MessageComponent {
 		discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
 				discordgo.Button{
-					Label:    "Done",
+					Label:    "Show in Channel",
 					Style:    discordgo.SuccessButton,
 					CustomID: p.handerPrefix + "pg_done",
 				},
@@ -161,11 +161,13 @@ func (p *PaginationView) CreateBtns() []discordgo.MessageComponent {
 					Style: discordgo.LinkButton,
 					URL:   p.embedLink,
 				},
-				discordgo.Button{
-					Label:    "Stop",
-					Style:    discordgo.DangerButton,
-					CustomID: p.handerPrefix + "pg_stop",
-				},
+				/*
+					discordgo.Button{
+						Label:    "Stop",
+						Style:    discordgo.DangerButton,
+						CustomID: p.handerPrefix + "pg_stop",
+					},
+				*/
 			},
 		},
 	}
@@ -187,7 +189,7 @@ func (p *PaginationView) SendMessage(s *discordgo.Session, i *discordgo.Interact
 		Data: &discordgo.InteractionResponseData{
 			// You can make searches only visible to the invoker with the following:
 			// (Note: The stop button won't work)
-			// Flags:      discordgo.MessageFlagsEphemeral,
+			Flags:      discordgo.MessageFlagsEphemeral,
 			Embeds:     p.CreateEmbed(),
 			Components: p.CreateBtns(),
 		},
@@ -205,7 +207,7 @@ func (p *PaginationView) UpdateMessage(s *discordgo.Session, i *discordgo.Intera
 		Data: &discordgo.InteractionResponseData{
 			// You can make searches only visible to the invoker with the following:
 			// (Note: The stop button won't work)
-			// Flags:      discordgo.MessageFlagsEphemeral
+			Flags:      discordgo.MessageFlagsEphemeral,
 			Embeds:     p.CreateEmbed(),
 			Components: p.CreateBtns(),
 		},
@@ -252,6 +254,8 @@ func (p *PaginationView) PG_LastBtnHandler(s *discordgo.Session, i *discordgo.In
 
 /*
 Deletes the message if pressed, also resets running status
+Note: this handler only works if the message is *not* ephemeral. Current impl. is
+the message *is* ephemeral, so this handler has no shown corresponding button atm.
 */
 func (p *PaginationView) PG_StopBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	/*
@@ -275,9 +279,20 @@ embed is permanent in the channel
 */
 func (p *PaginationView) PG_DoneBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseUpdateMessage,
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: p.CreateEmbed(),
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.Button{
+							Label: "View",
+							Style: discordgo.LinkButton,
+							URL:   p.embedLink,
+						},
+					},
+				},
+			},
 		},
 	})
 	log.Printf("[INFO] Pagination %s stopped, embed remains in channel", p.handerPrefix)

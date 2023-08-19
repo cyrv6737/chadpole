@@ -33,4 +33,20 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		*/
 		s.ChannelPermissionSet(m.ChannelID, roleID, 0, 0, permission)
 	}
+
+	if len(m.Attachments) > 0 { // Check if message contains attachments
+		for _, attachment := range m.Attachments {
+			if attachment.ContentType == "image/png" {
+				the_message := discordgo.MessageSend{
+					Content: "You sent a png image",
+					Reference: &discordgo.MessageReference{ // Reply to the message in question
+						MessageID: m.ID,
+						ChannelID: m.ChannelID,
+						GuildID:   m.GuildID,
+					},
+				}
+				s.ChannelMessageSendComplex(m.ChannelID, &the_message) // Send the message reply
+			}
+		}
+	}
 }

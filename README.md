@@ -21,6 +21,7 @@ $ DC_TOKEN=<discord bot token> ./chadpole
 |------|---------|
 | msg.go | Simple message listener/handler. Not intended to be used to listen for legacy prefix commands. |
 | frog_api.go | Simple API that serves a JSON response of 5 frogs |
+| ocr.go | Functions that allow the bot to scan an image against Google's Tesseract OCR |
 
 ### Commands package
 This bot uses slash commands exclusively.

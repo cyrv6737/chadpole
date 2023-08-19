@@ -9,24 +9,6 @@ import (
 	"github.com/otiai10/gosseract/v2"
 )
 
-var (
-	imageTypes = []string{"image/png", "image/jpeg", "image/bmp", "image/webp", "image/tiff"}
-)
-
-/*
-Check to make sure content type is valid for tesseract
-*/
-func CheckContentType(c string, l []string) bool {
-	for _, item := range l {
-		if item == c {
-			log.Println("[INFO] Found valid ContentType for OCR")
-			return true
-		}
-	}
-	log.Println("[ERROR] Invalid ContentType for OCR")
-	return false
-}
-
 /*
 Make the tesseract client, pull the attachment via URL and save it as bytes.
 Run tesseract over the saved bytes and return OCR string

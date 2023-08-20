@@ -66,7 +66,7 @@ func RegisterAllCommands(s *discordgo.Session) {
 		}
 		registeredCommands[i] = cmd
 	}
-	log.Println("[IFNO] All commands registered to Chadpole")
+	log.Println("[INFO] All commands registered to Chadpole")
 }
 
 // Attach all of the handlers required for functionality

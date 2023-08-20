@@ -4,6 +4,7 @@ import (
 	"chadpole/commands"
 	"chadpole/util"
 	"log"
+	"sync"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -103,4 +104,39 @@ func SetupStatus(s *discordgo.Session) {
 			},
 		},
 	})
+}
+
+func MainSetup(s *discordgo.Session) {
+	/*
+		RegisterAllCommands(chadpole)
+		SetupAllHandlers(chadpole)
+		SetupStatus(chadpole)
+
+		Setup does not need to be done with goroutines at all here
+		mainly exists to have an example of several functions running off of goroutines with waitgroups and waiting
+	*/
+
+	var setup_wg sync.WaitGroup
+
+	setup_wg.Add(3)
+
+	go func() {
+		defer setup_wg.Done()
+		RegisterAllCommands(s)
+	}()
+
+	go func() {
+		defer setup_wg.Done()
+		SetupAllHandlers(s)
+	}()
+
+	go func() {
+		defer setup_wg.Done()
+		SetupStatus(s)
+	}()
+
+	setup_wg.Wait()
+
+	// Start frog API on its own goroutine
+	go util.StartFrogAPI()
 }

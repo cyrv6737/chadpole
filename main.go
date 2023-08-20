@@ -1,7 +1,6 @@
 package main
 
 import (
-	"chadpole/util"
 	"log"
 	"os"
 	"os/signal"
@@ -27,12 +26,8 @@ func main() {
 	log.Println("[START] Chadpole is ribbiting...")
 	defer chadpole.Close()
 
-	RegisterAllCommands(chadpole)
-	SetupAllHandlers(chadpole)
-	SetupStatus(chadpole)
+	MainSetup(chadpole)
 
-	// Start frog API on its own goroutine
-	go util.StartFrogAPI()
 	// Run until terminated in the console
 	log.Println("[INFO] Ready")
 	c := make(chan os.Signal, 1)

@@ -49,17 +49,9 @@ func OCRResponse(s *discordgo.Session, m *discordgo.MessageCreate) {
 		for _, attachment := range m.Attachments {
 			if CheckContentType(attachment.ContentType, imageTypes) {
 				log.Println("[INFO] Sending OCR Message")
-				s.ChannelMessageSendComplex(m.ChannelID, BuildOCRMessage(attachment, m)) // Send the message reply
+				s.ChannelMessageSendComplex(m.ChannelID, BuildOCRMessage(attachment, m, 0)) // Send the message reply
 			} else {
-				the_message := discordgo.MessageSend{
-					Content: "Invalid attachment content type",
-					Reference: &discordgo.MessageReference{ // Reply to the message in question
-						MessageID: m.ID,
-						ChannelID: m.ChannelID,
-						GuildID:   m.GuildID,
-					},
-				}
-				s.ChannelMessageSendComplex(m.ChannelID, &the_message) // Send the message reply
+				s.ChannelMessageSendComplex(m.ChannelID, BuildOCRMessage(attachment, m, 1))
 			}
 		}
 	} else if m.MessageReference != nil {
@@ -71,48 +63,33 @@ func OCRResponse(s *discordgo.Session, m *discordgo.MessageCreate) {
 			for _, attachment := range ref_message.Attachments {
 				if CheckContentType(attachment.ContentType, imageTypes) {
 					log.Println("[INFO] Sending OCR Message")
-					s.ChannelMessageSendComplex(m.ChannelID, BuildOCRMessage(attachment, m)) // Send the message reply
+					s.ChannelMessageSendComplex(m.ChannelID, BuildOCRMessage(attachment, m, 0)) // Send the message reply
 				} else {
-					the_message := discordgo.MessageSend{
-						Content: "Invalid attachment content type",
-						Reference: &discordgo.MessageReference{ // Reply to the message in question
-							MessageID: m.ID,
-							ChannelID: m.ChannelID,
-							GuildID:   m.GuildID,
-						},
-					}
-					s.ChannelMessageSendComplex(m.ChannelID, &the_message) // Send the message reply
+					s.ChannelMessageSendComplex(m.ChannelID, BuildOCRMessage(attachment, m, 1))
 				}
 			}
 		} else {
 			log.Println("[ERROR] No attachment found in OCR request")
-			the_message := discordgo.MessageSend{
-				Content: "No attachment found",
-				Reference: &discordgo.MessageReference{ // Reply to the message in question
-					MessageID: m.ID,
-					ChannelID: m.ChannelID,
-					GuildID:   m.GuildID,
-				},
-			}
-			s.ChannelMessageSendComplex(m.ChannelID, &the_message) // Send the message reply
+			s.ChannelMessageSendComplex(m.ChannelID, BuildNoAttachMessage(m))
 		}
 	} else {
 		log.Println("[ERROR] No attachment found in OCR request")
-		the_message := discordgo.MessageSend{
-			Content: "No attachment found",
-			Reference: &discordgo.MessageReference{ // Reply to the message in question
-				MessageID: m.ID,
-				ChannelID: m.ChannelID,
-				GuildID:   m.GuildID,
-			},
-		}
-		s.ChannelMessageSendComplex(m.ChannelID, &the_message) // Send the message reply
+		s.ChannelMessageSendComplex(m.ChannelID, BuildNoAttachMessage(m))
 	}
 }
 
-func BuildOCRMessage(a *discordgo.MessageAttachment, m *discordgo.MessageCreate) *discordgo.MessageSend {
-	the_message := discordgo.MessageSend{
-		Content: "```\n" + DiscordImageToOCR(a) + "\n```",
+func BuildOCRMessage(a *discordgo.MessageAttachment, m *discordgo.MessageCreate, c int) *discordgo.MessageSend {
+	var msg_content string
+
+	switch c {
+	case 0:
+		msg_content = "```\n" + DiscordImageToOCR(a) + "\n```"
+	case 1:
+		msg_content = "Invalid attachment content type"
+	}
+
+	message := discordgo.MessageSend{
+		Content: msg_content,
 		Reference: &discordgo.MessageReference{ // Reply to the message in question
 			MessageID: m.ID,
 			ChannelID: m.ChannelID,
@@ -120,5 +97,18 @@ func BuildOCRMessage(a *discordgo.MessageAttachment, m *discordgo.MessageCreate)
 		},
 	}
 
-	return &the_message
+	return &message
+}
+
+func BuildNoAttachMessage(m *discordgo.MessageCreate) *discordgo.MessageSend {
+	message := discordgo.MessageSend{
+		Content: "No attachments found in message",
+		Reference: &discordgo.MessageReference{ // Reply to the message in question
+			MessageID: m.ID,
+			ChannelID: m.ChannelID,
+			GuildID:   m.GuildID,
+		},
+	}
+
+	return &message
 }

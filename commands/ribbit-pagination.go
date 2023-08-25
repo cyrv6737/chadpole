@@ -36,15 +36,20 @@ from an API for example
 */
 type PaginationView struct {
 	sync.Mutex
-	index           int
-	embedtitle      string
-	embeddesc       string
-	embedLink       string
-	embedImgURL     string
-	handerPrefix    string
-	pageBtnHandlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
-	exampleData     []FrogExample // Create a slice of the struct where our data will be stored.
-	currentPage     int
+	index               int
+	embedtitle          string
+	embeddesc           string
+	embedLink           string
+	embedImgURL         string
+	handerPrefix        string
+	pageBtnHandlers     map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
+	data                []FrogExample // Create a slice of the struct where our data will be stored.
+	currentPage         int
+	enableLink          bool
+	isEphemeral         bool
+	enableStop          bool
+	enableShowInChannel bool
+	enableSecondRow     bool
 }
 
 type FrogExample struct {
@@ -99,17 +104,17 @@ Creates the embed. This function is called every time there is an update to the 
 */
 func (p *PaginationView) CreateEmbed() []*discordgo.MessageEmbed {
 	// Pull data from Data slice based on the index which is modified with the buttons
-	p.embedtitle = p.exampleData[p.index].FrogName
-	p.embeddesc = p.exampleData[p.index].FrogDesc
-	p.embedLink = p.exampleData[p.index].FrogLink
-	p.embedImgURL = p.exampleData[p.index].FrogImage
+	p.embedtitle = p.data[p.index].FrogName
+	p.embeddesc = p.data[p.index].FrogDesc
+	p.embedLink = p.data[p.index].FrogLink
+	p.embedImgURL = p.data[p.index].FrogImage
 
 	embed := []*discordgo.MessageEmbed{
 		{
 			Title:       p.embedtitle,
 			Description: p.embeddesc,
 			Footer: &discordgo.MessageEmbedFooter{
-				Text: fmt.Sprintf("Page: %d/%d", p.currentPage, len(p.exampleData)),
+				Text: fmt.Sprintf("Page: %d/%d", p.currentPage, len(p.data)),
 			},
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: p.embedImgURL,
@@ -124,55 +129,75 @@ func (p *PaginationView) CreateEmbed() []*discordgo.MessageEmbed {
 Since we need to create these buttons multiple times in the code, throw them in a function to improve readability
 */
 func (p *PaginationView) CreateBtns() []discordgo.MessageComponent {
-	component := []discordgo.MessageComponent{
-		discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.Button{
-					Label:    "<<",
-					Style:    discordgo.PrimaryButton,
-					CustomID: p.handerPrefix + "pg_first",
-				},
-				discordgo.Button{
-					Label:    "<",
-					Style:    discordgo.PrimaryButton,
-					CustomID: p.handerPrefix + "pg_prev",
-				},
-				discordgo.Button{
-					Label:    ">",
-					Style:    discordgo.PrimaryButton,
-					CustomID: p.handerPrefix + "pg_next",
-				},
-				discordgo.Button{
-					Label:    ">>",
-					Style:    discordgo.PrimaryButton,
-					CustomID: p.handerPrefix + "pg_last",
-				},
+
+	var buttonComplex []discordgo.MessageComponent
+	var secondRowBtns []discordgo.MessageComponent
+
+	buttonRowOne := discordgo.ActionsRow{
+		Components: []discordgo.MessageComponent{
+			discordgo.Button{
+				Label:    "<<",
+				Style:    discordgo.PrimaryButton,
+				CustomID: p.handerPrefix + "pg_first",
 			},
-		},
-		discordgo.ActionsRow{
-			Components: []discordgo.MessageComponent{
-				discordgo.Button{
-					Label:    "Show in Channel",
-					Style:    discordgo.SuccessButton,
-					CustomID: p.handerPrefix + "pg_done",
-				},
-				discordgo.Button{
-					Label: "View",
-					Style: discordgo.LinkButton,
-					URL:   p.embedLink,
-				},
-				/*
-					discordgo.Button{
-						Label:    "Stop",
-						Style:    discordgo.DangerButton,
-						CustomID: p.handerPrefix + "pg_stop",
-					},
-				*/
+			discordgo.Button{
+				Label:    "<",
+				Style:    discordgo.PrimaryButton,
+				CustomID: p.handerPrefix + "pg_prev",
+			},
+			discordgo.Button{
+				Label:    ">",
+				Style:    discordgo.PrimaryButton,
+				CustomID: p.handerPrefix + "pg_next",
+			},
+			discordgo.Button{
+				Label:    ">>",
+				Style:    discordgo.PrimaryButton,
+				CustomID: p.handerPrefix + "pg_last",
 			},
 		},
 	}
 
-	return component
+	buttonComplex = append(buttonComplex, buttonRowOne)
+
+	if p.enableSecondRow {
+		if p.enableShowInChannel {
+			secondRowBtns = append(secondRowBtns, discordgo.Button{
+				Label:    "Show in Channel",
+				Style:    discordgo.SuccessButton,
+				CustomID: p.handerPrefix + "pg_done",
+			})
+		}
+
+		if p.enableLink {
+			secondRowBtns = append(secondRowBtns, discordgo.Button{
+				Label: "View",
+				Style: discordgo.LinkButton,
+				URL:   p.embedLink,
+			})
+		}
+
+		if p.enableStop {
+			secondRowBtns = append(secondRowBtns, discordgo.Button{
+				Label:    "Stop",
+				Style:    discordgo.DangerButton,
+				CustomID: p.handerPrefix + "pg_stop",
+			})
+		}
+	} else {
+
+		return buttonComplex
+
+	}
+
+	buttonRowTwo := discordgo.ActionsRow{
+		Components: secondRowBtns,
+	}
+
+	buttonComplex = append(buttonComplex, buttonRowTwo)
+
+	return buttonComplex
+
 }
 
 /*
@@ -184,16 +209,28 @@ Handers are added several times because currently they are set to add once to av
 func (p *PaginationView) SendMessage(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Setup(s, i)               // Call setup function first so the handler prefix can be generated and all handlers added
 	p.currentPage = p.index + 1 // Display page number normally
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			// You can make searches only visible to the invoker with the following:
-			// (Note: The stop button won't work)
-			Flags:      discordgo.MessageFlagsEphemeral,
-			Embeds:     p.CreateEmbed(),
-			Components: p.CreateBtns(),
-		},
-	})
+
+	if p.isEphemeral {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				// You can make searches only visible to the invoker with the following:
+				// (Note: The stop button won't work)
+				Flags:      discordgo.MessageFlagsEphemeral,
+				Embeds:     p.CreateEmbed(),
+				Components: p.CreateBtns(),
+			},
+		})
+	} else {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds:     p.CreateEmbed(),
+				Components: p.CreateBtns(),
+			},
+		})
+	}
+
 	log.Printf("[INFO] Sent initial pagination view for %s", p.handerPrefix)
 }
 
@@ -202,16 +239,27 @@ Updates the message every time next or prev is pressed
 */
 func (p *PaginationView) UpdateMessage(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.currentPage = p.index + 1 // Display page number normally
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseUpdateMessage,
-		Data: &discordgo.InteractionResponseData{
-			// You can make searches only visible to the invoker with the following:
-			// (Note: The stop button won't work)
-			Flags:      discordgo.MessageFlagsEphemeral,
-			Embeds:     p.CreateEmbed(),
-			Components: p.CreateBtns(),
-		},
-	})
+	if p.isEphemeral {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseUpdateMessage,
+			Data: &discordgo.InteractionResponseData{
+				// You can make searches only visible to the invoker with the following:
+				// (Note: The stop button won't work)
+				Flags:      discordgo.MessageFlagsEphemeral,
+				Embeds:     p.CreateEmbed(),
+				Components: p.CreateBtns(),
+			},
+		})
+	} else {
+		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseUpdateMessage,
+			Data: &discordgo.InteractionResponseData{
+				Embeds:     p.CreateEmbed(),
+				Components: p.CreateBtns(),
+			},
+		})
+	}
+
 	log.Printf("[INFO] Updated pagination %s", p.handerPrefix)
 }
 
@@ -222,7 +270,7 @@ a data structure
 func (p *PaginationView) PG_NextBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Lock()
 	defer p.Unlock()
-	p.index = (p.index + 1) % len(p.exampleData) // Circular pagination
+	p.index = (p.index + 1) % len(p.data) // Circular pagination
 	log.Printf("[INFO] Pagination %s data incremented", p.handerPrefix)
 	p.UpdateMessage(s, i)
 }
@@ -231,10 +279,10 @@ func (p *PaginationView) PG_PrevBtnHandler(s *discordgo.Session, i *discordgo.In
 	p.Lock()
 	defer p.Unlock()
 	if p.index == 0 { // Prevent running out of bounds. Function as a "last" button if index is at 0
-		p.index = len(p.exampleData) - 1
+		p.index = len(p.data) - 1
 		p.UpdateMessage(s, i)
 	} else {
-		p.index = (p.index - 1) % len(p.exampleData) // Circular pagination
+		p.index = (p.index - 1) % len(p.data) // Circular pagination
 		log.Printf("[INFO] Pagination %s data decremented", p.handerPrefix)
 		p.UpdateMessage(s, i)
 	}
@@ -248,7 +296,7 @@ func (p *PaginationView) PG_FirstBtnHandler(s *discordgo.Session, i *discordgo.I
 
 func (p *PaginationView) PG_LastBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	log.Printf("[INFO] Pagination %s data set to last index", p.handerPrefix)
-	p.index = len(p.exampleData) - 1
+	p.index = len(p.data) - 1
 	p.UpdateMessage(s, i)
 }
 
@@ -331,12 +379,17 @@ func RibbitPaginationHandler(s *discordgo.Session, i *discordgo.InteractionCreat
 	jsonResult := <-jsonChannel
 
 	new_pagination := PaginationView{
-		index:           0,
-		pageBtnHandlers: make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)), // Must create the map for the handler CustomIDs
-		exampleData:     []FrogExample{},                                                             // Declare slice of JSON receiver struct
+		index:               0,
+		pageBtnHandlers:     make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)), // Must create the map for the handler CustomIDs
+		data:                []FrogExample{},                                                             // Declare slice of JSON receiver struct
+		enableLink:          true,
+		enableStop:          false,
+		enableShowInChannel: true,
+		enableSecondRow:     true,
+		isEphemeral:         true,
 	}
 
-	err := json.Unmarshal(jsonResult, &new_pagination.exampleData)
+	err := json.Unmarshal(jsonResult, &new_pagination.data)
 	if err != nil {
 		log.Println("[ERROR] Could not decode json")
 	}

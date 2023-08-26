@@ -62,12 +62,12 @@ func (p *PaginationView) setup(s *discordgo.Session, i *discordgo.InteractionCre
 	p.handlerPrefix = p.genPrefix() // Generate prefix to uniquely identify paginator controls
 	p.Unlock()
 	// Assign handlers to their respective CustomIDs
-	p.PageBtnHandlers[p.handlerPrefix+"pg_next"] = p.PG_NextBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_prev"] = p.PG_PrevBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_stop"] = p.PG_StopBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_done"] = p.PG_DoneBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_first"] = p.PG_FirstBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_last"] = p.PG_LastBtnHandler
+	p.PageBtnHandlers[p.handlerPrefix+"pg_next"] = p.nextBtnHandler
+	p.PageBtnHandlers[p.handlerPrefix+"pg_prev"] = p.prevBtnHandler
+	p.PageBtnHandlers[p.handlerPrefix+"pg_stop"] = p.stopBtnHandler
+	p.PageBtnHandlers[p.handlerPrefix+"pg_done"] = p.doneBtnHandler
+	p.PageBtnHandlers[p.handlerPrefix+"pg_first"] = p.firstBtnHandler
+	p.PageBtnHandlers[p.handlerPrefix+"pg_last"] = p.lastBtnHandler
 	// Add the handlers to the bot
 	p.addHandlers(s, i)
 	p.currentPage = p.Index + 1
@@ -262,7 +262,7 @@ func (p *PaginationView) paginatorUpdateMessage(s *discordgo.Session, i *discord
 Increments the index value. In a proper situation you would use this index value to get more data from
 a data structure
 */
-func (p *PaginationView) PG_NextBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) nextBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Lock()
 	defer p.Unlock()
 	p.Index = (p.Index + 1) % len(p.Data) // Circular pagination
@@ -270,7 +270,7 @@ func (p *PaginationView) PG_NextBtnHandler(s *discordgo.Session, i *discordgo.In
 	p.paginatorUpdateMessage(s, i)
 }
 
-func (p *PaginationView) PG_PrevBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) prevBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Lock()
 	defer p.Unlock()
 	if p.Index == 0 { // Prevent running out of bounds. Function as a "last" button if index is at 0
@@ -283,13 +283,13 @@ func (p *PaginationView) PG_PrevBtnHandler(s *discordgo.Session, i *discordgo.In
 	}
 }
 
-func (p *PaginationView) PG_FirstBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) firstBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	log.Printf("[INFO] Pagination %s data set to first", p.handlerPrefix)
 	p.Index = 0
 	p.paginatorUpdateMessage(s, i)
 }
 
-func (p *PaginationView) PG_LastBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) lastBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	log.Printf("[INFO] Pagination %s data set to last index", p.handlerPrefix)
 	p.Index = len(p.Data) - 1
 	p.paginatorUpdateMessage(s, i)
@@ -300,7 +300,7 @@ Deletes the message if pressed
 Note: this handler only works if the message is *not* ephemeral. Current impl. is
 the message *is* ephemeral, so this handler has no shown corresponding button atm.
 */
-func (p *PaginationView) PG_StopBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) stopBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	/*
 		Holy fucking shit
 		this is how you delete your own fucking message
@@ -323,7 +323,7 @@ Gets rid of the buttons so theembed is permanent in the channel
 
 Send a new message without the ephemeral flag and retain some buttons but not all (current impl.)
 */
-func (p *PaginationView) PG_DoneBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) doneBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{

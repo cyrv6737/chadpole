@@ -238,7 +238,7 @@ func (p *PaginationView) SendMessage(s *discordgo.Session, i *discordgo.Interact
 /*
 Updates the message every time next or prev is pressed
 */
-func (p *PaginationView) paginatorUpdateMessage(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (p *PaginationView) updateMessage(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.currentPage = p.index + 1 // Display page number normally
 	if p.IsEphemeral {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -273,7 +273,7 @@ func (p *PaginationView) nextBtnHandler(s *discordgo.Session, i *discordgo.Inter
 	defer p.Unlock()
 	p.index = (p.index + 1) % len(p.Data) // Circular pagination
 	log.Printf("[INFO] Pagination %s data incremented", p.handlerPrefix)
-	p.paginatorUpdateMessage(s, i)
+	p.updateMessage(s, i)
 }
 
 func (p *PaginationView) prevBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -281,24 +281,24 @@ func (p *PaginationView) prevBtnHandler(s *discordgo.Session, i *discordgo.Inter
 	defer p.Unlock()
 	if p.index == 0 { // Prevent running out of bounds. Function as a "last" button if index is at 0
 		p.index = len(p.Data) - 1
-		p.paginatorUpdateMessage(s, i)
+		p.updateMessage(s, i)
 	} else {
 		p.index = (p.index - 1) % len(p.Data) // Circular pagination
 		log.Printf("[INFO] Pagination %s data decremented", p.handlerPrefix)
-		p.paginatorUpdateMessage(s, i)
+		p.updateMessage(s, i)
 	}
 }
 
 func (p *PaginationView) firstBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	log.Printf("[INFO] Pagination %s data set to first", p.handlerPrefix)
 	p.index = 0
-	p.paginatorUpdateMessage(s, i)
+	p.updateMessage(s, i)
 }
 
 func (p *PaginationView) lastBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	log.Printf("[INFO] Pagination %s data set to last index", p.handlerPrefix)
 	p.index = len(p.Data) - 1
-	p.paginatorUpdateMessage(s, i)
+	p.updateMessage(s, i)
 }
 
 /*

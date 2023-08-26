@@ -31,15 +31,17 @@ from an API for example
 */
 type PaginationView struct {
 	sync.Mutex
-	Index               int
-	EmbedTitle          string
-	EmbedDesc           string
-	EmbedLink           string
-	EmbedImgURL         string
-	handlerPrefix       string
-	PageBtnHandlers     map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
+	// Unexported
+	index           int
+	embedTitle      string
+	embedDesc       string
+	embedLink       string
+	embedImgURL     string
+	handlerPrefix   string
+	pageBtnHandlers map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)
+	currentPage     int
+	// Exported
 	Data                []PageData // Create a slice of the struct where our data will be stored.
-	currentPage         int
 	EnableLink          bool
 	IsEphemeral         bool
 	EnableStop          bool
@@ -60,17 +62,21 @@ General setup housekeeping should go here
 func (p *PaginationView) setup(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Lock()
 	p.handlerPrefix = p.genPrefix() // Generate prefix to uniquely identify paginator controls
+	// The map for all the handlers
+	p.pageBtnHandlers = make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate))
+	p.index = 0
 	p.Unlock()
+
 	// Assign handlers to their respective CustomIDs
-	p.PageBtnHandlers[p.handlerPrefix+"pg_next"] = p.nextBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_prev"] = p.prevBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_stop"] = p.stopBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_done"] = p.doneBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_first"] = p.firstBtnHandler
-	p.PageBtnHandlers[p.handlerPrefix+"pg_last"] = p.lastBtnHandler
+	p.pageBtnHandlers[p.handlerPrefix+"pg_next"] = p.nextBtnHandler
+	p.pageBtnHandlers[p.handlerPrefix+"pg_prev"] = p.prevBtnHandler
+	p.pageBtnHandlers[p.handlerPrefix+"pg_stop"] = p.stopBtnHandler
+	p.pageBtnHandlers[p.handlerPrefix+"pg_done"] = p.doneBtnHandler
+	p.pageBtnHandlers[p.handlerPrefix+"pg_first"] = p.firstBtnHandler
+	p.pageBtnHandlers[p.handlerPrefix+"pg_last"] = p.lastBtnHandler
 	// Add the handlers to the bot
 	p.addHandlers(s, i)
-	p.currentPage = p.Index + 1
+	p.currentPage = p.index + 1
 }
 
 /*
@@ -99,20 +105,20 @@ Creates the embed. This function is called every time there is an update to the 
 */
 func (p *PaginationView) createEmbed() []*discordgo.MessageEmbed {
 	// Pull data from Data slice based on the index which is modified with the buttons
-	p.EmbedTitle = p.Data[p.Index].Title
-	p.EmbedDesc = p.Data[p.Index].Desc
-	p.EmbedLink = p.Data[p.Index].Link
-	p.EmbedImgURL = p.Data[p.Index].ImageURL
+	p.embedTitle = p.Data[p.index].Title
+	p.embedDesc = p.Data[p.index].Desc
+	p.embedLink = p.Data[p.index].Link
+	p.embedImgURL = p.Data[p.index].ImageURL
 
 	embed := []*discordgo.MessageEmbed{
 		{
-			Title:       p.EmbedTitle,
-			Description: p.EmbedDesc,
+			Title:       p.embedTitle,
+			Description: p.embedDesc,
 			Footer: &discordgo.MessageEmbedFooter{
 				Text: fmt.Sprintf("Page: %d/%d", p.currentPage, len(p.Data)),
 			},
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: p.EmbedImgURL,
+				URL: p.embedImgURL,
 			},
 		},
 	}
@@ -168,7 +174,7 @@ func (p *PaginationView) createButtons() []discordgo.MessageComponent {
 			secondRowBtns = append(secondRowBtns, discordgo.Button{
 				Label: "View",
 				Style: discordgo.LinkButton,
-				URL:   p.EmbedLink,
+				URL:   p.embedLink,
 			})
 		}
 
@@ -203,7 +209,7 @@ Handers are added several times because currently they are set to add once to av
 */
 func (p *PaginationView) SendMessage(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.setup(s, i)               // Call setup function first so the handler prefix can be generated and all handlers added
-	p.currentPage = p.Index + 1 // Display page number normally
+	p.currentPage = p.index + 1 // Display page number normally
 
 	if p.IsEphemeral {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -233,7 +239,7 @@ func (p *PaginationView) SendMessage(s *discordgo.Session, i *discordgo.Interact
 Updates the message every time next or prev is pressed
 */
 func (p *PaginationView) paginatorUpdateMessage(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	p.currentPage = p.Index + 1 // Display page number normally
+	p.currentPage = p.index + 1 // Display page number normally
 	if p.IsEphemeral {
 		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseUpdateMessage,
@@ -265,7 +271,7 @@ a data structure
 func (p *PaginationView) nextBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Lock()
 	defer p.Unlock()
-	p.Index = (p.Index + 1) % len(p.Data) // Circular pagination
+	p.index = (p.index + 1) % len(p.Data) // Circular pagination
 	log.Printf("[INFO] Pagination %s data incremented", p.handlerPrefix)
 	p.paginatorUpdateMessage(s, i)
 }
@@ -273,11 +279,11 @@ func (p *PaginationView) nextBtnHandler(s *discordgo.Session, i *discordgo.Inter
 func (p *PaginationView) prevBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	p.Lock()
 	defer p.Unlock()
-	if p.Index == 0 { // Prevent running out of bounds. Function as a "last" button if index is at 0
-		p.Index = len(p.Data) - 1
+	if p.index == 0 { // Prevent running out of bounds. Function as a "last" button if index is at 0
+		p.index = len(p.Data) - 1
 		p.paginatorUpdateMessage(s, i)
 	} else {
-		p.Index = (p.Index - 1) % len(p.Data) // Circular pagination
+		p.index = (p.index - 1) % len(p.Data) // Circular pagination
 		log.Printf("[INFO] Pagination %s data decremented", p.handlerPrefix)
 		p.paginatorUpdateMessage(s, i)
 	}
@@ -285,13 +291,13 @@ func (p *PaginationView) prevBtnHandler(s *discordgo.Session, i *discordgo.Inter
 
 func (p *PaginationView) firstBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	log.Printf("[INFO] Pagination %s data set to first", p.handlerPrefix)
-	p.Index = 0
+	p.index = 0
 	p.paginatorUpdateMessage(s, i)
 }
 
 func (p *PaginationView) lastBtnHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	log.Printf("[INFO] Pagination %s data set to last index", p.handlerPrefix)
-	p.Index = len(p.Data) - 1
+	p.index = len(p.Data) - 1
 	p.paginatorUpdateMessage(s, i)
 }
 
@@ -334,7 +340,7 @@ func (p *PaginationView) doneBtnHandler(s *discordgo.Session, i *discordgo.Inter
 						discordgo.Button{
 							Label: "View",
 							Style: discordgo.LinkButton,
-							URL:   p.EmbedLink,
+							URL:   p.embedLink,
 						},
 					},
 				},
@@ -354,7 +360,7 @@ func (p *PaginationView) addHandlers(s *discordgo.Session, i *discordgo.Interact
 		switch i.Type {
 		// Attach component handlers, such as handlers for buttons
 		case discordgo.InteractionMessageComponent:
-			if h, ok := p.PageBtnHandlers[i.MessageComponentData().CustomID]; ok {
+			if h, ok := p.pageBtnHandlers[i.MessageComponentData().CustomID]; ok {
 				h(s, i)
 			}
 		}

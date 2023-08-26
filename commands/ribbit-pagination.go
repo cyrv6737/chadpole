@@ -35,9 +35,7 @@ func RibbitPaginationHandler(s *discordgo.Session, i *discordgo.InteractionCreat
 	jsonResult := <-jsonChannel
 
 	new_pagination := widgets.PaginationView{
-		Index:               0,
-		PageBtnHandlers:     make(map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate)), // Must create the map for the handler CustomIDs
-		Data:                []widgets.PageData{},                                                        // Declare slice of PageData struct to store page data
+		Data:                []widgets.PageData{}, // Declare slice of PageData struct to store page data
 		EnableLink:          true,
 		EnableStop:          false,
 		EnableShowInChannel: true,

@@ -10,6 +10,24 @@ KNOWN ISSUES:
     This will ensure that different handlers are assigned to the pagination every time.
     The drawback of this is that there are now essentially "dead handlers" attached to the bot. Maybe
     the garbage collector deals with it at some point. The fuck do I know. At least it works now
+
+
+Example usage:
+
+	new_pagination := widgets.PaginationView{
+		Data:                []widgets.PageData{},
+		EnableLink:          true,
+		EnableStop:          false,
+		EnableShowInChannel: true,
+		EnableSecondRow:     true,
+		IsEphemeral:         true,
+	}
+
+	... fill in data for new_pagination.PageData
+
+	new_pagination.SendMessage(session, interaction)
+
+
 */
 
 package widgets

@@ -23,6 +23,11 @@ $ DC_TOKEN=<discord bot token> ./chadpole
 | frog_api.go | Simple API that serves a JSON response of 5 frogs |
 | ocr.go | Functions that allow the bot to scan an image against Google's Tesseract OCR |
 
+### Widgets package
+This package is designed to contain portable code to use in other projects(maybe)
+| File | Purpose |
+|------|---------|
+| paginator.go | Contains all structs and functions to create a fully functional pagination message. See `ribbit-pagination.go` for example usage |
 ### Commands package
 This bot uses slash commands exclusively.
 | File | Purpose |
@@ -32,7 +37,7 @@ This bot uses slash commands exclusively.
 | ribbit-embed.go | Ping-pong impl. with an embed |
 | ribbit-button.go | Ping-pong impl. with some buttons |
 | ribbit-btn-edit.go | Message with buttons that when pressed edit the message or do something |
-| ribbit-pagination.go | Example impl. of a paginated embed using discord buttons. To my knowledge this is the only public example of pagination in discordgo with buttons. This one also handles multiple pagination sessions (in a slightly ham-fisted manner). Pulls data from frog API.
+| ribbit-pagination.go | Example impl. of a paginated embed using discord buttons. To my knowledge this is the only public example of pagination in discordgo with buttons. This one also handles multiple pagination sessions (in a slightly ham-fisted manner). Pulls data from frog API. |
 
 ## Documentation Used
 - https://0x2142.com/how-to-discordgo-bot/
